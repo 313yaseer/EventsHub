@@ -1,0 +1,3 @@
+model = "gpt-5.4 medium"
+sanbox_model = "workspace-write"
+approval_policy = "on-request"
