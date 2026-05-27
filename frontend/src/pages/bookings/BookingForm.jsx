@@ -230,8 +230,8 @@ export default function BookingForm() {
     <PageWrapper title={isEditMode ? 'Edit Booking' : 'New Booking'} backTo="/bookings">
       <form onSubmit={handleSubmit((values) => submitMutation.mutate(values))}>
         <div className="grid gap-6 xl:grid-cols-2">
-          <Card title="Client">
-            <div className="relative">
+          <Card title="Client" className="min-w-0">
+            <div className="relative min-w-0">
               <Input
                 label="Search client"
                 name="client_search"
@@ -244,7 +244,7 @@ export default function BookingForm() {
                 }}
               />
               {clientSearch.length >= 2 && !selectedClient ? (
-                <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 shadow-xl">
+                <div className="absolute left-0 right-0 z-20 mt-2 max-h-72 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 shadow-xl">
                   {clients.map((client) => (
                     <button
                       key={client.id}
@@ -256,8 +256,12 @@ export default function BookingForm() {
                       }}
                       className="block w-full px-4 py-3 text-left text-sm text-slate-200 hover:bg-slate-800"
                     >
-                      <span className="font-medium">{client.full_name ?? client.name}</span>
-                      <span className="block text-slate-500">{client.email ?? client.phone}</span>
+                      <span className="block truncate font-medium">
+                        {client.full_name ?? client.name}
+                      </span>
+                      <span className="block truncate text-slate-500">
+                        {client.email ?? client.phone}
+                      </span>
                     </button>
                   ))}
                   <button
@@ -287,10 +291,11 @@ export default function BookingForm() {
             ) : null}
 
             {showNewClient ? (
-              <div className="mt-5 grid gap-4">
+              <div className="mt-5 grid min-w-0 gap-4 sm:grid-cols-2">
                 <Input
                   label="Full name"
                   name="new_client_full_name"
+                  className="min-w-0"
                   value={newClient.full_name}
                   onChange={(event) =>
                     setNewClient((current) => ({ ...current, full_name: event.target.value }))
@@ -301,6 +306,7 @@ export default function BookingForm() {
                   label="Email"
                   name="new_client_email"
                   type="email"
+                  className="min-w-0"
                   value={newClient.email}
                   onChange={(event) =>
                     setNewClient((current) => ({ ...current, email: event.target.value }))
@@ -309,6 +315,7 @@ export default function BookingForm() {
                 <Input
                   label="Phone"
                   name="new_client_phone"
+                  className="min-w-0"
                   value={newClient.phone}
                   onChange={(event) =>
                     setNewClient((current) => ({ ...current, phone: event.target.value }))
@@ -317,6 +324,7 @@ export default function BookingForm() {
                 <Input
                   label="Address"
                   name="new_client_address"
+                  className="min-w-0 sm:col-span-2"
                   value={newClient.address}
                   onChange={(event) =>
                     setNewClient((current) => ({ ...current, address: event.target.value }))

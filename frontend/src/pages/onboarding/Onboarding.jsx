@@ -71,6 +71,54 @@ function emptyHall() {
   }
 }
 
+function optionalText(value) {
+  const trimmedValue = String(value ?? '').trim()
+  return trimmedValue || undefined
+}
+
+function optionalNumber(value) {
+  if (value === '' || value === null || value === undefined) {
+    return undefined
+  }
+
+  const numberValue = Number(value)
+  return Number.isFinite(numberValue) ? numberValue : undefined
+}
+
+function buildOnboardingPayload(formData) {
+  const halls = formData.halls
+    .map((hall) => {
+      const name = optionalText(hall.name)
+      const capacity = optionalNumber(hall.capacity)
+      const pricePerHour = optionalNumber(hall.price_per_hour)
+
+      if (!name && !capacity && !pricePerHour) {
+        return null
+      }
+
+      if (!name) {
+        throw new Error('Enter a hall name or leave the hall fields empty.')
+      }
+
+      return {
+        name,
+        capacity,
+        price_per_hour: pricePerHour,
+      }
+    })
+    .filter(Boolean)
+
+  return {
+    business_name: optionalText(formData.business_name),
+    phone: optionalText(formData.phone),
+    address: optionalText(formData.address),
+    city: optionalText(formData.city),
+    state: optionalText(formData.state),
+    timezone: optionalText(formData.timezone),
+    halls,
+  }
+}
+
 function ChecklistItem({ children }) {
   return (
     <li className="flex items-center gap-3 text-sm text-slate-300">
@@ -151,7 +199,7 @@ export default function Onboarding() {
     setError('')
 
     try {
-      const response = await completeOnboarding(formData)
+      const response = await completeOnboarding(buildOnboardingPayload(formData))
       const payload = getPayload(response)
 
       if (payload.tenant) {
