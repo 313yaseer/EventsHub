@@ -72,7 +72,7 @@ function PasswordInput({
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${id}-error` : undefined}
           className={[
-            'w-full rounded-lg border bg-slate-900 py-2 pl-3 pr-11 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-60',
+            'w-full rounded-lg border bg-slate-900 py-2 pl-3 pr-11 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-(--primary) focus:outline-none focus:ring-1 focus:ring-(--primary) disabled:cursor-not-allowed disabled:opacity-60',
             error ? 'border-red-500' : 'border-slate-700',
           ].join(' ')}
           {...registerProps}
@@ -107,6 +107,8 @@ export default function Signup() {
     watch,
     formState: { errors, isSubmitting },
   } = useForm({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       full_name: '',
       business_name: '',
@@ -136,6 +138,17 @@ export default function Signup() {
       navigate('/check-email', { state: { email: values.email } })
     } catch (error) {
       const payload = getErrorPayload(error)
+
+      if (error?.response?.status === 409 && payload.action === 'VERIFY_EMAIL') {
+        navigate('/check-email', {
+          state: {
+            email: payload.email ?? values.email,
+            message: payload.message,
+          },
+        })
+        return
+      }
+
       setApiError(payload.message ?? error.message ?? 'Could not create your account.')
     }
   }
@@ -301,9 +314,9 @@ export default function Signup() {
               <input
                 type="checkbox"
                 disabled={isSubmitting}
-                className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-900 text-[var(--primary)] focus:ring-[var(--primary)]"
+                className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-900 text-(--primary) focus:ring-(--primary)"
                 {...register('terms', {
-                  required: 'You must agree to the Terms of Service',
+                  validate: (value) => value === true || 'You must agree to the Terms of Service',
                 })}
               />
               <span>

@@ -28,9 +28,9 @@ export default function Toggle({ checked = false, onChange, disabled = false, si
         disabled={disabled}
         onClick={() => onChange?.(!checked)}
         className={[
-          'relative inline-flex shrink-0 rounded-full p-0.5 transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-60',
+          'relative inline-flex shrink-0 rounded-full p-0.5 transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary) disabled:cursor-not-allowed disabled:opacity-60',
           currentSize.track,
-          checked ? 'bg-[var(--primary)]' : 'bg-slate-600',
+          checked ? 'bg-(--primary)' : 'bg-slate-600',
         ].join(' ')}
       >
         <span

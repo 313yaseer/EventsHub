@@ -148,7 +148,7 @@ export default function BillingTab() {
         row.pdf_url ?? row.invoice_pdf ? (
           <a
             href={row.pdf_url ?? row.invoice_pdf}
-            className="inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)]"
+            className="inline-flex items-center gap-2 text-sm font-medium text-(--primary)"
             target="_blank"
             rel="noreferrer"
           >
@@ -246,7 +246,7 @@ export default function BillingTab() {
                 key={key}
                 className={[
                   'rounded-xl border bg-slate-900 p-5',
-                  highlighted ? 'border-[var(--primary)] shadow-[0_0_30px_rgba(var(--primary-rgb),0.18)]' : 'border-slate-700',
+                  highlighted ? 'border-(--primary) shadow-[0_0_30px_rgba(var(--primary-rgb),0.18)]' : 'border-slate-700',
                 ].join(' ')}
               >
                 <div className="flex items-start justify-between gap-3">

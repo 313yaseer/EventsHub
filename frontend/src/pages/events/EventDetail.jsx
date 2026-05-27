@@ -221,7 +221,7 @@ export default function EventDetail() {
                     className={[
                       'rounded-md px-3 py-1.5 text-sm font-medium',
                       filter === value
-                        ? 'bg-[var(--primary)] text-white'
+                        ? 'bg-(--primary) text-white'
                         : 'text-slate-400 hover:text-slate-100',
                     ].join(' ')}
                   >
@@ -289,7 +289,7 @@ export default function EventDetail() {
               <p className="text-slate-300">Phone: {event.client?.phone ?? '-'}</p>
               <Link
                 to={`/bookings/${event.booking_id ?? event.booking?.id}`}
-                className="inline-flex text-[var(--primary)] hover:brightness-125"
+                className="inline-flex text-(--primary) hover:brightness-125"
               >
                 Booking reference
               </Link>

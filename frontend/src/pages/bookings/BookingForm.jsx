@@ -267,7 +267,7 @@ export default function BookingForm() {
                       setSelectedClient(null)
                       setNewClient((current) => ({ ...current, full_name: clientSearch }))
                     }}
-                    className="flex w-full items-center gap-2 border-t border-slate-700 px-4 py-3 text-left text-sm font-medium text-[var(--primary)] hover:bg-slate-800"
+                    className="flex w-full items-center gap-2 border-t border-slate-700 px-4 py-3 text-left text-sm font-medium text-(--primary) hover:bg-slate-800"
                   >
                     <UserPlus className="h-4 w-4" />
                     Create new client

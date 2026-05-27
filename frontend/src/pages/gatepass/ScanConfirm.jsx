@@ -249,7 +249,7 @@ export default function ScanConfirm() {
             value={token}
             onChange={(event) => setToken(event.target.value)}
             placeholder="Scan or enter QR token..."
-            className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-5 py-5 text-xl font-semibold text-slate-100 placeholder:text-slate-600 focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+            className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-5 py-5 text-xl font-semibold text-slate-100 placeholder:text-slate-600 focus:border-(--primary) focus:outline-none focus:ring-1 focus:ring-(--primary)"
             autoFocus
           />
           <Button type="submit" size="lg" className="w-full" loading={mutation.isPending}>

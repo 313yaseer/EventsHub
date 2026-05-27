@@ -38,7 +38,7 @@ export default function Navbar({ title }) {
 
         <button
           type="button"
-          className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+          className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary)"
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />

@@ -137,9 +137,23 @@ async function signup(req, res, next) {
     }
 
     const email = normalizeEmail(value.email);
-    const existingUser = await query('SELECT id FROM users WHERE email = $1', [email]);
+    const existingUser = await query('SELECT id, email, is_verified FROM users WHERE email = $1', [
+      email,
+    ]);
 
     if (existingUser.rows.length > 0) {
+      const user = existingUser.rows[0];
+
+      if (!user.is_verified) {
+        return res.status(409).json({
+          success: false,
+          message:
+            'Email already registered but not verified. Resend the verification email to continue.',
+          action: 'VERIFY_EMAIL',
+          email: user.email,
+        });
+      }
+
       throw new AppError('Email already registered', 409);
     }
 
@@ -149,7 +163,6 @@ async function signup(req, res, next) {
       Number(process.env.BCRYPT_ROUNDS || 12)
     );
     const verifyToken = generateTokenValue();
-    const verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const created = await withTransaction(async (client) => {
       const tenantResult = await client.query(
@@ -168,7 +181,7 @@ async function signup(req, res, next) {
            tenant_id, full_name, email, password_hash, role,
            verify_token, verify_token_expires, is_verified
          )
-         VALUES ($1, $2, $3, $4, 'owner', $5, $6, false)
+         VALUES ($1, $2, $3, $4, 'owner', $5, NOW() + INTERVAL '24 hours', false)
          RETURNING id, email`,
         [
           tenantId,
@@ -176,7 +189,6 @@ async function signup(req, res, next) {
           email,
           passwordHash,
           verifyToken,
-          verifyTokenExpires,
         ]
       );
 
@@ -186,14 +198,20 @@ async function signup(req, res, next) {
         [tenantId]
       );
 
+      try {
+        await sendVerificationEmail(email, value.full_name, verifyToken);
+      } catch (mailError) {
+        console.error('Failed to send verification email:', mailError);
+        throw new AppError(
+          'Could not send verification email. Check email settings and try again.',
+          502
+        );
+      }
+
       return {
         tenantId,
         user: userResult.rows[0],
       };
-    });
-
-    sendVerificationEmail(email, value.full_name, verifyToken).catch((mailError) => {
-      console.error('Failed to send verification email:', mailError);
     });
 
     return res.status(201).json({
@@ -387,17 +405,24 @@ async function resendVerification(req, res, next) {
     }
 
     const verifyToken = generateTokenValue();
-    const verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await query(
       `UPDATE users
        SET verify_token = $1,
-           verify_token_expires = $2
-       WHERE id = $3`,
-      [verifyToken, verifyTokenExpires, user.id]
+           verify_token_expires = NOW() + INTERVAL '24 hours'
+       WHERE id = $2`,
+      [verifyToken, user.id]
     );
 
-    await sendVerificationEmail(user.email, user.full_name, verifyToken);
+    try {
+      await sendVerificationEmail(user.email, user.full_name, verifyToken);
+    } catch (mailError) {
+      console.error('Failed to send verification email:', mailError);
+      throw new AppError(
+        'Could not send verification email. Check email settings and try again.',
+        502
+      );
+    }
 
     return res.status(200).json({
       success: true,
@@ -426,14 +451,13 @@ async function forgotPassword(req, res, next) {
 
     if (user) {
       const resetToken = generateTokenValue();
-      const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
 
       await query(
         `UPDATE users
          SET reset_token = $1,
-             reset_token_expires = $2
-         WHERE id = $3`,
-        [resetToken, resetTokenExpires, user.id]
+             reset_token_expires = NOW() + INTERVAL '1 hour'
+         WHERE id = $2`,
+        [resetToken, user.id]
       );
 
       await sendPasswordResetEmail(user.email, user.full_name, resetToken);

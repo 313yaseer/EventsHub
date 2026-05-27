@@ -283,7 +283,7 @@ export default function Reports() {
             className={[
               'rounded-full px-4 py-2 text-sm font-medium transition',
               activeTab === tab.key
-                ? 'bg-[var(--primary)] text-white'
+                ? 'bg-(--primary) text-white'
                 : 'bg-slate-800 text-slate-400 hover:text-slate-100',
             ].join(' ')}
           >

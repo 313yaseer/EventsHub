@@ -43,7 +43,7 @@ export default function Input({
             error ? `${name}-error` : hint ? `${name}-hint` : undefined
           }
           className={[
-            'w-full rounded-lg border bg-slate-900 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-60',
+            'w-full rounded-lg border bg-slate-900 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-(--primary) focus:outline-none focus:ring-1 focus:ring-(--primary) disabled:cursor-not-allowed disabled:opacity-60',
             icon ? 'pl-10 pr-3' : 'px-3',
             error ? 'border-red-500' : 'border-slate-700',
           ].join(' ')}

@@ -183,7 +183,7 @@ export default function UpcomingEvents() {
             className={[
               'rounded-full px-4 py-2 text-sm font-medium capitalize transition',
               filters.status === tab
-                ? 'bg-[var(--primary)] text-white'
+                ? 'bg-(--primary) text-white'
                 : 'bg-slate-800 text-slate-400 hover:text-slate-100',
             ].join(' ')}
           >

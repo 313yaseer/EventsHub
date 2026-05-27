@@ -234,7 +234,7 @@ export default function BookingDetail() {
               </span>
               <Link
                 to={`/clients/${booking.client_id ?? booking.client?.id}`}
-                className="font-medium text-[var(--primary)] hover:brightness-125"
+                className="font-medium text-(--primary) hover:brightness-125"
               >
                 View Client History
               </Link>

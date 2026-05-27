@@ -46,7 +46,7 @@ function SidebarLink({ item }) {
         [
           'flex items-center gap-3 border-r-2 px-4 py-2.5 text-sm font-medium transition',
           isActive
-            ? 'border-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_20%,transparent)] text-[var(--primary)]'
+            ? 'border-(--primary) bg-[color-mix(in_srgb,var(--primary)_20%,transparent)] text-(--primary)'
             : 'border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-100',
         ].join(' ')
       }
@@ -77,7 +77,7 @@ export default function Sidebar() {
               className="max-h-10 max-w-full object-contain"
             />
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-(--primary) text-sm font-semibold text-white">
               {businessInitials}
             </div>
           )}
@@ -134,7 +134,7 @@ export default function Sidebar() {
           <button
             type="button"
             onClick={logout}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary)"
           >
             <LogOut className="h-4 w-4" />
             Logout

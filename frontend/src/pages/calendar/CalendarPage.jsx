@@ -143,7 +143,7 @@ function Toolbar({ label, onNavigate, onView, view }) {
               className={[
                 'rounded-md px-3 py-1.5 text-sm font-medium transition',
                 view === item.value
-                  ? 'bg-[var(--primary)] text-white'
+                  ? 'bg-(--primary) text-white'
                   : 'text-slate-400 hover:text-slate-100',
               ].join(' ')}
             >

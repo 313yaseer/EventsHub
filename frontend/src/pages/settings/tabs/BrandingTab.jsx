@@ -88,7 +88,7 @@ export default function BrandingTab() {
       ) : null}
 
       <Card title="Business Logo">
-        <label className="flex h-32 w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-slate-600 bg-slate-900 text-center transition hover:border-[var(--primary)]">
+        <label className="flex h-32 w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-slate-600 bg-slate-900 text-center transition hover:border-(--primary)">
           <input type="file" accept="image/png,image/jpeg" hidden onChange={handleLogo} />
           {logoMutation.isPending ? (
             <LoadingSpinner />

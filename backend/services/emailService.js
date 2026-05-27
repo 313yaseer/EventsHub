@@ -2,15 +2,57 @@ const nodemailer = require('nodemailer');
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
-const transport = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT),
-  secure: Number(process.env.EMAIL_PORT) === 465,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const PLACEHOLDER_VALUES = new Set([
+  '',
+  'your@gmail.com',
+  'your_gmail_app_password',
+  'no-reply@eventshub.com',
+]);
+
+function isConfigured(value) {
+  return value && !PLACEHOLDER_VALUES.has(value.trim());
+}
+
+function hasEmailConfig() {
+  return (
+    isConfigured(process.env.EMAIL_HOST) &&
+    isConfigured(process.env.EMAIL_PORT) &&
+    isConfigured(process.env.EMAIL_USER) &&
+    isConfigured(process.env.EMAIL_PASS) &&
+    isConfigured(process.env.EMAIL_FROM)
+  );
+}
+
+const transport = hasEmailConfig()
+  ? nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
+      secure: Number(process.env.EMAIL_PORT) === 465,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    })
+  : null;
+
+async function sendMail(options) {
+  if (transport) {
+    return transport.sendMail(options);
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Email service is not configured');
+  }
+
+  console.warn('Email service is not configured. Development email output follows.');
+  console.info({
+    to: options.to,
+    subject: options.subject,
+    previewUrl: options.previewUrl,
+  });
+
+  return { messageId: 'dev-email-not-configured' };
+}
 
 function buildEmailTemplate({
   heading,
@@ -47,40 +89,44 @@ function buildEmailTemplate({
 }
 
 async function sendVerificationEmail(to, fullName, token) {
+  const buttonUrl = `${CLIENT_URL}/verify-email?token=${token}`;
   const html = buildEmailTemplate({
     heading: 'Verify your account',
     greeting: `Hi ${fullName},`,
     message: 'Please verify your email to activate your account.',
     buttonText: 'Verify Email',
-    buttonUrl: `${CLIENT_URL}/verify-email?token=${token}`,
+    buttonUrl,
     expiryText: 'Link expires in 24 hours.',
     footerText: "If you didn't create this account, ignore this email.",
   });
 
-  return transport.sendMail({
+  return sendMail({
     from: process.env.EMAIL_FROM,
     to,
     subject: 'Verify your EventsHub account',
     html,
+    previewUrl: buttonUrl,
   });
 }
 
 async function sendPasswordResetEmail(to, fullName, token) {
+  const buttonUrl = `${CLIENT_URL}/reset-password?token=${token}`;
   const html = buildEmailTemplate({
     heading: 'Reset your password',
     greeting: `Hi ${fullName},`,
     message: 'We received a request to reset your EventsHub password.',
     buttonText: 'Reset Password',
-    buttonUrl: `${CLIENT_URL}/reset-password?token=${token}`,
+    buttonUrl,
     expiryText: 'Link expires in 1 hour.',
     footerText: "If you didn't request a password reset, ignore this email.",
   });
 
-  return transport.sendMail({
+  return sendMail({
     from: process.env.EMAIL_FROM,
     to,
     subject: 'Reset your EventsHub password',
     html,
+    previewUrl: buttonUrl,
   });
 }
 
@@ -91,12 +137,13 @@ async function sendInvitationEmail(
   role,
   token
 ) {
+  const buttonUrl = `${CLIENT_URL}/accept-invite?token=${token}`;
   const html = buildEmailTemplate({
     heading: `You're invited to join ${businessName}`,
     greeting: `Hi,`,
     message: `${inviterName} invited you to join ${businessName} on EventsHub.`,
     buttonText: 'Accept Invitation',
-    buttonUrl: `${CLIENT_URL}/accept-invite?token=${token}`,
+    buttonUrl,
     expiryText: 'Invitation expires in 48 hours.',
     footerText: "If you weren't expecting this invitation, you can ignore this email.",
     extraContent: `
@@ -107,11 +154,12 @@ async function sendInvitationEmail(
     `,
   });
 
-  return transport.sendMail({
+  return sendMail({
     from: process.env.EMAIL_FROM,
     to,
     subject: `You're invited to join ${businessName} on EventsHub`,
     html,
+    previewUrl: buttonUrl,
   });
 }
 

@@ -9,7 +9,7 @@ export default function LoadingSpinner({ size = 'md', className = '' }) {
     <div className={['flex items-center justify-center', className].filter(Boolean).join(' ')}>
       <div
         className={[
-          'animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent',
+          'animate-spin rounded-full border-2 border-(--primary) border-t-transparent',
           sizes[size] ?? sizes.md,
         ].join(' ')}
       />

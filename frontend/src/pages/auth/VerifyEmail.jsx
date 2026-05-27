@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { CheckCircle, XCircle } from 'lucide-react'
 import { verifyEmail } from '../../api/authApi'
@@ -10,6 +10,7 @@ export default function VerifyEmail({ token: tokenProp }) {
   const [searchParams] = useSearchParams()
   const token = tokenProp ?? searchParams.get('token')
   const [status, setStatus] = useState('loading')
+  const hasSubmittedVerification = useRef(false)
 
   useEffect(() => {
     let mounted = true
@@ -19,6 +20,12 @@ export default function VerifyEmail({ token: tokenProp }) {
         setStatus('error')
         return
       }
+
+      if (hasSubmittedVerification.current) {
+        return
+      }
+
+      hasSubmittedVerification.current = true
 
       try {
         await verifyEmail(token)

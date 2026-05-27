@@ -11,9 +11,10 @@ function getErrorPayload(error) {
 export default function CheckEmail() {
   const location = useLocation()
   const email = location.state?.email ?? ''
-  const [cooldown, setCooldown] = useState(60)
+  const initialMessage = location.state?.message ?? ''
+  const [cooldown, setCooldown] = useState(initialMessage ? 0 : 60)
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState(initialMessage)
   const [error, setError] = useState('')
 
   useEffect(() => {

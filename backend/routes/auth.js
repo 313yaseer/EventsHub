@@ -1,5 +1,4 @@
 const express = require('express');
-const rateLimit = require('express-rate-limit');
 
 const {
   signup,
@@ -16,16 +15,9 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 router.post('/signup', signup);
 router.get('/verify/:token', verifyEmail);
-router.post('/login', authLimiter, login);
+router.post('/login', login);
 router.post('/logout', protect, logout);
 router.get('/me', protect, getMe);
 router.post('/resend-verification', resendVerification);

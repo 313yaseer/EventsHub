@@ -178,7 +178,7 @@ export default function Onboarding() {
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-slate-800">
             <div
-              className="h-full rounded-full bg-[var(--primary)] transition-all"
+              className="h-full rounded-full bg-(--primary) transition-all"
               style={{ width: `${(step / 3) * 100}%` }}
             />
           </div>
@@ -188,7 +188,7 @@ export default function Onboarding() {
           {step === 1 ? (
             <div>
               <div className="mb-6">
-                <p className="text-sm font-medium text-[var(--primary)]">
+                <p className="text-sm font-medium text-(--primary)">
                   Tell us about your business
                 </p>
                 <h1 className="mt-2 text-3xl font-semibold text-white">
@@ -258,7 +258,7 @@ export default function Onboarding() {
           {step === 2 ? (
             <div>
               <div className="mb-6">
-                <p className="text-sm font-medium text-[var(--primary)]">Set up your halls</p>
+                <p className="text-sm font-medium text-(--primary)">Set up your halls</p>
                 <h1 className="mt-2 text-3xl font-semibold text-white">
                   Configure your venue spaces
                 </h1>
@@ -310,7 +310,7 @@ export default function Onboarding() {
                   type="button"
                   onClick={addHall}
                   disabled={isFreePlan && formData.halls.length >= 1}
-                  className="inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)] transition hover:brightness-125 disabled:cursor-not-allowed disabled:text-slate-500"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-(--primary) transition hover:brightness-125 disabled:cursor-not-allowed disabled:text-slate-500"
                 >
                   <Plus className="h-4 w-4" />
                   Add Another Hall

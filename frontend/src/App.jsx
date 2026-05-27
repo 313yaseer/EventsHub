@@ -105,9 +105,10 @@ function AuthBootstrap() {
 
 function PublicRoute() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const role = useAuthStore((state) => state.user?.role)
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={role === 'super_admin' ? '/admin/overview' : '/dashboard'} replace />
   }
 
   return <Outlet />
@@ -120,6 +121,10 @@ function ProtectedRoute() {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  if (user?.role === 'super_admin') {
+    return <Navigate to="/admin/overview" replace />
   }
 
   if (!user?.onboarding_complete && location.pathname !== '/onboarding') {

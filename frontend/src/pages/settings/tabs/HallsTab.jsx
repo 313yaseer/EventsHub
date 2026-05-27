@@ -136,7 +136,7 @@ export default function HallsTab() {
                   className={[
                     'rounded-full border px-3 py-1 text-sm',
                     form.amenities.includes(amenity)
-                      ? 'border-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_20%,transparent)] text-slate-100'
+                      ? 'border-(--primary) bg-[color-mix(in_srgb,var(--primary)_20%,transparent)] text-slate-100'
                       : 'border-slate-700 text-slate-400',
                   ].join(' ')}
                 >

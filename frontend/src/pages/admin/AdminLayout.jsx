@@ -10,6 +10,8 @@ const navItems = [
 
 export default function AdminLayout() {
   const user = useAuthStore((state) => state.user)
+  const isImpersonating = useAuthStore((state) => state.isImpersonating)
+  const appLink = isImpersonating ? '/dashboard' : '/admin/tenants'
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100">
@@ -51,9 +53,14 @@ export default function AdminLayout() {
         </nav>
 
         <div className="border-t border-slate-800 p-5">
-          <Link to="/dashboard" className="mb-5 inline-flex text-sm text-slate-400 hover:text-white">
-            ← Back to App
+          <Link to={appLink} className="mb-2 inline-flex text-sm text-slate-400 hover:text-white">
+            ← {isImpersonating ? 'Back to App' : 'Select Tenant App'}
           </Link>
+          {!isImpersonating ? (
+            <p className="mb-5 text-xs leading-5 text-slate-500">
+              Super admins must impersonate a tenant before opening the tenant app.
+            </p>
+          ) : null}
           <p className="truncate text-sm font-medium text-slate-100">{user?.full_name ?? 'Super Admin'}</p>
           <p className="truncate text-xs text-slate-500">{user?.email}</p>
         </div>

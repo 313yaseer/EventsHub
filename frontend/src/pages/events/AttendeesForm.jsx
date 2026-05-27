@@ -112,7 +112,7 @@ export default function AttendeesForm() {
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-slate-800">
           <div
-            className="h-full rounded-full bg-[var(--primary)] transition-all"
+            className="h-full rounded-full bg-(--primary) transition-all"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
@@ -238,7 +238,7 @@ export default function AttendeesForm() {
 
       {mutation.isPending ? (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/80 text-slate-100 backdrop-blur-sm">
-          <Loader2 className="h-12 w-12 animate-spin text-[var(--primary)]" />
+          <Loader2 className="h-12 w-12 animate-spin text-(--primary)" />
           <p className="mt-4 text-lg font-semibold">Generating gate passes...</p>
         </div>
       ) : null}

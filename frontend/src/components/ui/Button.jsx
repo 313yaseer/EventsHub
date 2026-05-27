@@ -1,7 +1,7 @@
 import { Loader2 } from 'lucide-react'
 
 const variants = {
-  primary: 'bg-[var(--primary)] text-white hover:brightness-90',
+  primary: 'bg-(--primary) text-white hover:brightness-90',
   secondary: 'bg-slate-700 text-slate-100 hover:bg-slate-600',
   danger: 'bg-red-600 text-white hover:bg-red-700',
   ghost: 'text-slate-300 hover:bg-slate-700',
@@ -34,7 +34,7 @@ export default function Button({
       onClick={onClick}
       disabled={isDisabled}
       className={[
-        'inline-flex items-center justify-center rounded-lg font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex items-center justify-center rounded-lg font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary) disabled:cursor-not-allowed disabled:opacity-60',
         variants[variant] ?? variants.primary,
         sizes[size] ?? sizes.md,
         className,

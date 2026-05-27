@@ -61,7 +61,7 @@ export default function Modal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-700 hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+                className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-700 hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary)"
                 aria-label="Close modal"
               >
                 <X className="h-5 w-5" />
