@@ -72,8 +72,9 @@ async function getDashboardStats(req, res, next) {
         [tenantId]
       ),
       query(
-        `SELECT e.*, b.event_name, b.event_type,
-                h.name AS hall_name, c.full_name AS client_name
+        `SELECT e.*, b.event_name, b.event_name AS name, b.event_type,
+                b.guest_count, h.name AS hall_name, c.full_name AS client_name,
+                COALESCE(e.total_attendees, 0)::int AS attendee_count
          FROM events e
          JOIN bookings b ON e.booking_id = b.id
          LEFT JOIN halls h ON b.hall_id = h.id
@@ -118,6 +119,7 @@ async function getDashboardStats(req, res, next) {
           toNumber(bookingsThisMonth.amount_paid),
         pending_bookings: toInt(pendingBookingsResult.rows[0].count),
         upcoming_events: toInt(upcomingEventsResult.rows[0].count),
+        events_today: todaysEventsResult.rows.length,
         todays_events: todaysEventsResult.rows,
         recent_bookings: recentBookingsResult.rows,
         monthly_revenue: monthlyRevenueResult.rows.map((row) => ({

@@ -30,7 +30,9 @@ import PageWrapper from '../../components/layout/PageWrapper'
 import { useAuthStore } from '../../store/authStore'
 
 function getStatsPayload(data) {
-  return data?.data ?? data ?? {}
+  const payload = data?.data ?? data ?? {}
+
+  return payload.stats ?? payload
 }
 
 function formatNumber(value = 0) {
@@ -136,7 +138,8 @@ export default function Dashboard() {
   const recentBookings = (stats.recent_bookings ?? []).slice(0, 5)
   const pendingBookings = Number(stats.pending_bookings) || 0
   const outstanding = Number(stats.outstanding_revenue ?? stats.outstanding) || 0
-  const todaysEventCount = Number(stats.events_today ?? stats.happening_today) || 0
+  const todaysEventCount =
+    Number(stats.events_today ?? stats.happening_today ?? todaysEvents.length) || 0
   const isUpgradeVisible =
     String(tenant?.plan ?? '').toLowerCase() === 'free' || tenant?.plan_status === 'trialing'
 
@@ -282,7 +285,9 @@ export default function Dashboard() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-slate-100">{event.name}</p>
+                      <p className="truncate font-semibold text-slate-100">
+                        {event.name ?? event.event_name ?? '-'}
+                      </p>
                       <p className="mt-1 text-sm text-slate-400">
                         {event.start_time} → {event.end_time}
                       </p>
