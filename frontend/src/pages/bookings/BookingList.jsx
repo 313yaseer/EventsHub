@@ -143,6 +143,9 @@ export default function BookingList() {
     onSuccess: () => {
       toast.success('Booking status updated')
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+      queryClient.invalidateQueries({ queryKey: ['calendar-events'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] })
       setConfirmAction(null)
     },
     onError: (error) => {

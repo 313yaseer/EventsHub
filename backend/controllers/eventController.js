@@ -144,16 +144,20 @@ async function getAllEvents(req, res, next) {
   try {
     const filters = {
       status: req.query.status ? String(req.query.status).trim() : '',
-      from: req.query.from ? normalizeDateOnly(req.query.from) : '',
-      to: req.query.to ? normalizeDateOnly(req.query.to) : '',
+      from: req.query.from || req.query.date_from || req.query.date
+        ? normalizeDateOnly(req.query.from ?? req.query.date_from ?? req.query.date)
+        : '',
+      to: req.query.to || req.query.date_to || req.query.date
+        ? normalizeDateOnly(req.query.to ?? req.query.date_to ?? req.query.date)
+        : '',
       search: req.query.search ? String(req.query.search).trim() : '',
     };
 
-    if (req.query.from && !filters.from) {
+    if ((req.query.from || req.query.date_from || req.query.date) && !filters.from) {
       throw new AppError('Invalid from date. Use YYYY-MM-DD', 400);
     }
 
-    if (req.query.to && !filters.to) {
+    if ((req.query.to || req.query.date_to || req.query.date) && !filters.to) {
       throw new AppError('Invalid to date. Use YYYY-MM-DD', 400);
     }
 

@@ -139,7 +139,13 @@ export default function UpcomingEvents() {
   )
 
   const params = useMemo(() => {
-    const next = { ...filters }
+    const next = {
+      status: filters.status,
+      search: filters.search,
+      from: filters.date_from,
+      to: filters.date_to,
+      page: filters.page,
+    }
     if (next.status === 'all') delete next.status
     return Object.fromEntries(Object.entries(next).filter(([, value]) => value))
   }, [filters])
