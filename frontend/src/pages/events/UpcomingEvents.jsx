@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Calendar, ChevronDown, User, Clock, Landmark, Users } from 'lucide-react'
-import { getEvents, updateEventStatus } from '../../api/eventsApi'
+import { Calendar, ChevronDown, User, Clock, Landmark, Trash2, Users } from 'lucide-react'
+import { deleteEvent, getEvents, updateEventStatus } from '../../api/eventsApi'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
 import Input from '../../components/ui/Input'
@@ -43,7 +43,7 @@ function formatDate(date) {
   }).format(new Date(date))
 }
 
-function EventCard({ event, onStatus, statusLoading }) {
+function EventCard({ event, onDelete, onStatus, statusLoading }) {
   const navigate = useNavigate()
   const attendees = Number(event.total_attendees ?? event.attendee_count ?? 0)
   const registered = Number(event.registered ?? event.registered_attendees ?? attendees)
@@ -107,6 +107,15 @@ function EventCard({ event, onStatus, statusLoading }) {
             Start Event
           </Button>
         ) : null}
+        {status === 'upcoming' || status === 'cancelled' ? (
+          <Button
+            variant="danger"
+            icon={<Trash2 className="h-4 w-4" />}
+            onClick={() => onDelete(event)}
+          >
+            Delete
+          </Button>
+        ) : null}
         {status === 'ongoing' ? (
           <Button
             variant="success"
@@ -126,6 +135,7 @@ export default function UpcomingEvents() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [confirm, setConfirm] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(null)
 
   const filters = useMemo(
     () => ({
@@ -174,6 +184,19 @@ export default function UpcomingEvents() {
       toast.success('Event status updated')
       queryClient.invalidateQueries({ queryKey: ['events'] })
       setConfirm(null)
+    },
+    onError: (error) => toast.error(error?.response?.data?.message ?? error.message),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteEvent(id),
+    onSuccess: () => {
+      toast.success('Event deleted')
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      queryClient.invalidateQueries({ queryKey: ['calendar-events'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] })
+      setConfirmDelete(null)
     },
     onError: (error) => toast.error(error?.response?.data?.message ?? error.message),
   })
@@ -250,6 +273,7 @@ export default function UpcomingEvents() {
               key={event.id}
               event={event}
               statusLoading={statusMutation.isPending}
+              onDelete={(event) => setConfirmDelete(event)}
               onStatus={(id, status) => setConfirm({ id, status })}
             />
           ))}
@@ -286,6 +310,17 @@ export default function UpcomingEvents() {
         message="This will update the event status immediately."
         confirmLabel={confirm?.status === 'ongoing' ? 'Start Event' : 'Complete Event'}
         loading={statusMutation.isPending}
+      />
+
+      <ConfirmDialog
+        isOpen={Boolean(confirmDelete)}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => deleteMutation.mutate(confirmDelete.id)}
+        title="Delete event?"
+        message="This permanently deletes the upcoming event, its booking, attendees, and generated gate passes."
+        confirmLabel="Delete Event"
+        danger
+        loading={deleteMutation.isPending}
       />
     </PageWrapper>
   )

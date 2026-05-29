@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Calendar, Clock, Download, Eye, Landmark, Printer, Users } from 'lucide-react'
-import { getEventById, updateEventStatus } from '../../api/eventsApi'
+import { Calendar, Clock, Download, Eye, Landmark, Printer, Trash2, Users } from 'lucide-react'
+import { deleteEvent, getEventById, updateEventStatus } from '../../api/eventsApi'
 import { deleteEventAttendees, getEventAttendees } from '../../api/attendeesApi'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
@@ -58,6 +58,7 @@ export default function EventDetail() {
   const [page, setPage] = useState(1)
   const [selectedPass, setSelectedPass] = useState(null)
   const [confirmClear, setConfirmClear] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ['event', id],
@@ -125,6 +126,19 @@ export default function EventDetail() {
     onError: (error) => toast.error(error?.response?.data?.message ?? error.message),
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteEvent(id),
+    onSuccess: () => {
+      toast.success('Event deleted')
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      queryClient.invalidateQueries({ queryKey: ['calendar-events'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] })
+      navigate('/events')
+    },
+    onError: (error) => toast.error(error?.response?.data?.message ?? error.message),
+  })
+
   if (isLoading) {
     return <LoadingSpinner size="lg" className="min-h-[50vh]" />
   }
@@ -161,12 +175,23 @@ export default function EventDetail() {
       backTo="/events"
       actions={
         statusAction ? (
-          <Button
-            loading={statusMutation.isPending}
-            onClick={() => statusMutation.mutate(statusAction.status)}
-          >
-            {statusAction.label}
-          </Button>
+          <>
+            <Button
+              loading={statusMutation.isPending}
+              onClick={() => statusMutation.mutate(statusAction.status)}
+            >
+              {statusAction.label}
+            </Button>
+            {event.status === 'upcoming' || event.status === 'cancelled' ? (
+              <Button
+                variant="danger"
+                icon={<Trash2 className="h-4 w-4" />}
+                onClick={() => setConfirmDelete(true)}
+              >
+                Delete
+              </Button>
+            ) : null}
+          </>
         ) : null
       }
     >
@@ -300,6 +325,17 @@ export default function EventDetail() {
               </div>
             ) : null}
 
+            {event.status === 'upcoming' || event.status === 'cancelled' ? (
+              <Button
+                variant="danger"
+                className="w-full"
+                icon={<Trash2 className="h-4 w-4" />}
+                onClick={() => setConfirmDelete(true)}
+              >
+                Delete Event
+              </Button>
+            ) : null}
+
             {event.payment_status !== 'paid' ? (
               <div className="rounded-lg border border-amber-500/30 bg-amber-500/15 p-4 text-sm text-amber-200">
                 <p>Complete payment to generate gate passes</p>
@@ -374,6 +410,17 @@ export default function EventDetail() {
         confirmLabel="Clear Passes"
         danger
         loading={clearMutation.isPending}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => deleteMutation.mutate()}
+        title="Delete event?"
+        message="This permanently deletes the upcoming event, its booking, attendees, and generated gate passes."
+        confirmLabel="Delete Event"
+        danger
+        loading={deleteMutation.isPending}
       />
     </PageWrapper>
   )

@@ -9,3 +9,5 @@ export const getCalendarEvents = (from, to) =>
 
 export const updateEventStatus = (id, status) =>
   axiosInstance.patch(`/events/${id}/status`, { status })
+
+export const deleteEvent = (id) => axiosInstance.delete(`/events/${id}`)

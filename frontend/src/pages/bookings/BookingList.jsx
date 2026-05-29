@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { CheckCircle, Edit, Eye, Plus, XCircle } from 'lucide-react'
+import { CheckCircle, Edit, Eye, Plus, Trash2, XCircle } from 'lucide-react'
 import {
+  deleteBooking,
   getBookings,
   toggleBookingActive,
   updateBookingStatus,
@@ -94,6 +95,7 @@ export default function BookingList() {
   const queryClient = useQueryClient()
   const [searchParams, setSearchParams] = useSearchParams()
   const [confirmAction, setConfirmAction] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(null)
 
   const filters = useMemo(
     () => ({
@@ -186,6 +188,21 @@ export default function BookingList() {
     },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteBooking(id),
+    onSuccess: () => {
+      toast.success('Booking deleted')
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+      queryClient.invalidateQueries({ queryKey: ['calendar-events'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] })
+      setConfirmDelete(null)
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message ?? error.message ?? 'Could not delete booking')
+    },
+  })
+
   const columns = [
     { key: 'client_name', label: 'Client Name', render: (row) => row.client_name ?? row.client?.full_name ?? row.client?.name ?? '-' },
     { key: 'event_name', label: 'Event Name', render: (row) => row.event_name ?? '-' },
@@ -250,6 +267,14 @@ export default function BookingList() {
                 </button>
               </>
             ) : null}
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(row)}
+              className="rounded-lg p-2 text-red-400 hover:bg-red-500/10"
+              aria-label="Delete booking"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
           </div>
         )
       },
@@ -349,6 +374,17 @@ export default function BookingList() {
         confirmLabel={confirmAction?.status === 'approved' ? 'Approve' : 'Reject'}
         danger={confirmAction?.status === 'rejected'}
         loading={statusMutation.isPending}
+      />
+
+      <ConfirmDialog
+        isOpen={Boolean(confirmDelete)}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => deleteMutation.mutate(confirmDelete.id)}
+        title="Delete booking?"
+        message="This permanently deletes the booking, its upcoming event, attendees, and generated gate passes."
+        confirmLabel="Delete Booking"
+        danger
+        loading={deleteMutation.isPending}
       />
     </PageWrapper>
   )

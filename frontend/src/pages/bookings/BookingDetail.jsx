@@ -8,10 +8,12 @@ import {
   Edit,
   FileText,
   Landmark,
+  Trash2,
   Timer,
   Users,
 } from 'lucide-react'
 import {
+  deleteBooking,
   getBookingById,
   toggleBookingActive,
   updateBookingStatus,
@@ -71,6 +73,7 @@ export default function BookingDetail() {
   const [confirmAction, setConfirmAction] = useState(null)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [paymentForm, setPaymentForm] = useState({ payment_status: 'unpaid', amount_paid: 0 })
 
@@ -126,6 +129,21 @@ export default function BookingDetail() {
     },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteBooking(id),
+    onSuccess: () => {
+      toast.success('Booking deleted')
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+      queryClient.invalidateQueries({ queryKey: ['calendar-events'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] })
+      navigate('/bookings')
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message ?? error.message ?? 'Could not delete booking')
+    },
+  })
+
   function openPaymentModal() {
     setPaymentForm({
       payment_status: booking.payment_status ?? 'unpaid',
@@ -166,6 +184,13 @@ export default function BookingDetail() {
               </Button>
             </>
           ) : null}
+          <Button
+            variant="danger"
+            icon={<Trash2 className="h-4 w-4" />}
+            onClick={() => setDeleteOpen(true)}
+          >
+            Delete
+          </Button>
         </div>
       }
     >
@@ -417,6 +442,17 @@ export default function BookingDetail() {
           </div>
         </div>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={() => deleteMutation.mutate()}
+        title="Delete booking?"
+        message="This permanently deletes the booking, its upcoming event, attendees, and generated gate passes."
+        confirmLabel="Delete Booking"
+        danger
+        loading={deleteMutation.isPending}
+      />
     </PageWrapper>
   )
 }

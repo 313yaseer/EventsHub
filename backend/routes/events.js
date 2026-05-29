@@ -5,6 +5,7 @@ const {
   getEventById,
   getCalendarEvents,
   updateEventStatus,
+  deleteEvent,
 } = require('../controllers/eventController');
 const { protect } = require('../middleware/auth');
 const { tenantScope } = require('../middleware/tenantScope');
@@ -18,5 +19,6 @@ router.get('/', getAllEvents);
 router.get('/calendar', getCalendarEvents);
 router.get('/:id', getEventById);
 router.patch('/:id/status', requireRole(['owner', 'manager']), updateEventStatus);
+router.delete('/:id', requireRole(['owner']), deleteEvent);
 
 module.exports = router;

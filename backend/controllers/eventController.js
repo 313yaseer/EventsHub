@@ -379,9 +379,57 @@ async function updateEventStatus(req, res, next) {
   }
 }
 
+async function deleteEvent(req, res, next) {
+  try {
+    const event = await getOwnedEvent(req.params.id, req.tenantId);
+
+    if (!event) {
+      throw new AppError('Event not found', 404);
+    }
+
+    if (!['upcoming', 'cancelled'].includes(event.status)) {
+      throw new AppError('Only upcoming or cancelled events can be deleted', 400);
+    }
+
+    await withTransaction(async (client) => {
+      await client.query(
+        `INSERT INTO audit_log (
+           actor_id, actor_email, tenant_id, action,
+           resource, resource_id, metadata
+         )
+         VALUES ($1, $2, $3, 'EVENT_DELETED', 'event', $4, $5)`,
+        [
+          req.user.id,
+          req.user.email,
+          req.tenantId,
+          req.params.id,
+          JSON.stringify({
+            booking_id: event.booking_id,
+            status: event.status,
+          }),
+        ]
+      );
+
+      await client.query(
+        `DELETE FROM bookings
+         WHERE id = $1 AND tenant_id = $2`,
+        [event.booking_id, req.tenantId]
+      );
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Event and related booking deleted',
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getAllEvents,
   getEventById,
   getCalendarEvents,
   updateEventStatus,
+  deleteEvent,
 };

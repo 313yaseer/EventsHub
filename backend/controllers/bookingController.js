@@ -733,25 +733,50 @@ async function deleteBooking(req, res, next) {
       throw new AppError('Booking not found', 404);
     }
 
-    if (booking.status === 'approved') {
+    const eventResult = await query(
+      `SELECT id, status
+       FROM events
+       WHERE booking_id = $1 AND tenant_id = $2`,
+      [req.params.id, req.tenantId]
+    );
+    const event = eventResult.rows[0];
+
+    if (event && ['ongoing', 'completed'].includes(event.status)) {
       throw new AppError(
-        'Cannot delete an approved booking. Cancel it instead.',
+        'Only bookings without active or completed events can be deleted',
         400
       );
     }
 
-    if (!['pending', 'rejected'].includes(booking.status)) {
-      throw new AppError('Only pending or rejected bookings can be deleted', 400);
-    }
+    await withTransaction(async (client) => {
+      await client.query(
+        `INSERT INTO audit_log (
+           actor_id, actor_email, tenant_id, action,
+           resource, resource_id, metadata
+         )
+         VALUES ($1, $2, $3, 'BOOKING_DELETED', 'booking', $4, $5)`,
+        [
+          req.user.id,
+          req.user.email,
+          req.tenantId,
+          req.params.id,
+          JSON.stringify({
+            status: booking.status,
+            event_id: event?.id,
+            event_status: event?.status,
+          }),
+        ]
+      );
 
-    await query('DELETE FROM bookings WHERE id = $1 AND tenant_id = $2', [
-      req.params.id,
-      req.tenantId,
-    ]);
+      await client.query(
+        'DELETE FROM bookings WHERE id = $1 AND tenant_id = $2',
+        [req.params.id, req.tenantId]
+      );
+    });
 
     return res.status(200).json({
       success: true,
-      message: 'Booking deleted',
+      message: 'Booking and related event deleted',
     });
   } catch (error) {
     next(error);
