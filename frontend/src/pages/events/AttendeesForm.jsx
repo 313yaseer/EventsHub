@@ -197,12 +197,23 @@ export default function AttendeesForm() {
   }, [generatedCount, maxGuests])
 
   const mutation = useMutation({
-    mutationFn: () => bulkCreateAttendees(id, attendees),
+    mutationFn: async () => {
+      const response = await bulkCreateAttendees(id, attendees)
+      const data = payload(response)
+
+      if (data.success === false) {
+        throw new Error(data.message || 'Could not generate gate passes')
+      }
+
+      return data
+    },
     onSuccess: () => {
       toast.success(`${attendees.length} passes generated!`)
       queryClient.invalidateQueries({ queryKey: ['event', id] })
       queryClient.invalidateQueries({ queryKey: ['event-attendees', id] })
-      navigate(`/events/${id}`)
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] })
+      navigate(`/events/${id}/gatepasses`)
     },
     onError: (error) => toast.error(error?.response?.data?.message ?? error.message),
   })
@@ -264,6 +275,30 @@ export default function AttendeesForm() {
 
     setWarning('')
     setStep(3)
+  }
+
+  function confirmGenerate() {
+    if (mutation.isPending) return
+
+    const duplicateSeats = findDuplicateSeats(attendees)
+    const incomplete = attendees.some(
+      (attendee) => !attendee.full_name.trim() || !attendee.seat_number.trim() || !attendee.tag.trim(),
+    )
+
+    if (!attendees.length || incomplete) {
+      setWarning('Fill all names, tags, and seat numbers before generating.')
+      setStep(2)
+      return
+    }
+
+    if (duplicateSeats.length) {
+      setWarning(`Seat numbers must be unique. Duplicate: ${duplicateSeats.join(', ')}.`)
+      setStep(2)
+      return
+    }
+
+    setWarning('')
+    mutation.mutate()
   }
 
   function autofill() {
@@ -487,7 +522,13 @@ export default function AttendeesForm() {
             <Button variant="secondary" onClick={() => setStep(2)}>
               Back
             </Button>
-            <Button variant="success" className="w-full sm:w-auto" onClick={() => mutation.mutate()}>
+            <Button
+              type="button"
+              variant="success"
+              className="w-full sm:w-auto"
+              loading={mutation.isPending}
+              onClick={confirmGenerate}
+            >
               Confirm & Generate
             </Button>
           </div>
