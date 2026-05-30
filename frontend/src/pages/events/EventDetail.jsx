@@ -284,69 +284,71 @@ export default function EventDetail() {
 
         <div className="space-y-6">
           <Card title="Actions">
-            {totalAttendees === 0 && event.payment_status === 'paid' ? (
-              <Button className="w-full" size="lg" onClick={() => navigate(`/events/${id}/attendees`)}>
-                Generate Gate Passes
-              </Button>
-            ) : null}
+            <div className="space-y-4">
+              {totalAttendees === 0 && event.payment_status === 'paid' ? (
+                <Button className="w-full" size="lg" onClick={() => navigate(`/events/${id}/attendees`)}>
+                  Generate Gate Passes
+                </Button>
+              ) : null}
 
-            {totalAttendees > 0 ? (
-              <div className="space-y-4">
-                <Badge variant="success">Passes Generated</Badge>
-                <p className="text-sm text-slate-300">
-                  {checkInCount} / {totalAttendees} checked in
-                </p>
-                <Button
-                  className="w-full"
-                  icon={<Eye className="h-4 w-4" />}
-                  onClick={() => navigate(`/events/${id}/gatepasses`)}
-                >
-                  View Gate Passes
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  icon={<Printer className="h-4 w-4" />}
-                  onClick={() => navigate(`/events/${id}/gatepasses`)}
-                >
-                  Print All
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  icon={<Download className="h-4 w-4" />}
-                  onClick={() => navigate(`/events/${id}/gatepasses`)}
-                >
-                  Download PDF
-                </Button>
-                <Button variant="danger" className="w-full" onClick={() => setConfirmClear(true)}>
-                  Clear & Regenerate
-                </Button>
-              </div>
-            ) : null}
+              {totalAttendees > 0 ? (
+                <div className="space-y-4">
+                  <Badge variant="success">Passes Generated</Badge>
+                  <p className="text-sm text-slate-300">
+                    {checkInCount} / {totalAttendees} checked in
+                  </p>
+                  <Button
+                    className="w-full"
+                    icon={<Eye className="h-4 w-4" />}
+                    onClick={() => navigate(`/events/${id}/gatepasses`)}
+                  >
+                    View Gate Passes
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    icon={<Printer className="h-4 w-4" />}
+                    onClick={() => navigate(`/events/${id}/gatepasses`)}
+                  >
+                    Print All
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    icon={<Download className="h-4 w-4" />}
+                    onClick={() => navigate(`/events/${id}/gatepasses`)}
+                  >
+                    Download PDF
+                  </Button>
+                  <Button variant="danger" className="w-full" onClick={() => setConfirmClear(true)}>
+                    Clear & Regenerate
+                  </Button>
+                </div>
+              ) : null}
 
-            {event.status !== 'ongoing' ? (
-              <Button
-                variant="danger"
-                className="w-full"
-                icon={<Trash2 className="h-4 w-4" />}
-                onClick={() => setConfirmDelete(true)}
-              >
-                Delete Event
-              </Button>
-            ) : null}
-
-            {event.payment_status !== 'paid' ? (
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/15 p-4 text-sm text-amber-200">
-                <p>Complete payment to generate gate passes</p>
-                <Link
-                  to={`/bookings/${event.booking_id ?? event.booking?.id}`}
-                  className="mt-3 inline-flex font-medium text-amber-100 hover:underline"
+              {event.status !== 'ongoing' ? (
+                <Button
+                  variant="danger"
+                  className="w-full"
+                  icon={<Trash2 className="h-4 w-4" />}
+                  onClick={() => setConfirmDelete(true)}
                 >
-                  Update Payment
-                </Link>
-              </div>
-            ) : null}
+                  Delete Event
+                </Button>
+              ) : null}
+
+              {event.payment_status !== 'paid' ? (
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/15 p-4 text-sm text-amber-200">
+                  <p>Complete payment to generate gate passes</p>
+                  <Link
+                    to={`/bookings/${event.booking_id ?? event.booking?.id}`}
+                    className="mt-3 inline-flex font-medium text-amber-100 hover:underline"
+                  >
+                    Update Payment
+                  </Link>
+                </div>
+              ) : null}
+            </div>
           </Card>
 
           <Card title="Event Info">
