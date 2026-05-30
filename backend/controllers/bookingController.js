@@ -211,6 +211,12 @@ async function getBookingDetails(bookingId, tenantId) {
             c.phone AS client_phone,
             c.address AS client_address,
             c.notes AS client_notes,
+            (
+              SELECT COUNT(*)::int
+              FROM bookings cb
+              WHERE cb.client_id = b.client_id
+                AND cb.tenant_id = b.tenant_id
+            ) AS client_total_bookings,
             h.name AS hall_name,
             h.capacity AS hall_capacity,
             h.description AS hall_description,
@@ -238,6 +244,18 @@ async function getBookingDetails(bookingId, tenantId) {
   if (!booking) {
     return null;
   }
+
+  booking.client = booking.client_id
+    ? {
+        id: booking.client_id,
+        full_name: booking.client_name,
+        email: booking.client_email,
+        phone: booking.client_phone,
+        address: booking.client_address,
+        notes: booking.client_notes,
+        total_bookings: booking.client_total_bookings,
+      }
+    : null;
 
   if (booking.event_id) {
     booking.event = {

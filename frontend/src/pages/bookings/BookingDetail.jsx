@@ -86,6 +86,7 @@ export default function BookingDetail() {
   const amountDue = Number(booking.amount_due) || 0
   const amountPaid = Number(booking.amount_paid) || 0
   const balance = Math.max(0, amountDue - amountPaid)
+  const client = booking.client ?? {}
   const isPending = booking.status === 'pending'
   const isApproved = booking.status === 'approved'
   const isPaid = booking.payment_status === 'paid'
@@ -201,7 +202,7 @@ export default function BookingDetail() {
               <DetailRow icon={Calendar} label="Date" value={formatDate(booking.preferred_date ?? booking.date)} />
               <DetailRow icon={Clock} label="Time" value={booking.preferred_time ?? booking.time} />
               <DetailRow icon={Timer} label="Duration" value={`${booking.duration_hours ?? booking.duration ?? '-'} hours`} />
-              <DetailRow icon={Users} label="Guests" value={booking.expected_guests ?? booking.guests} />
+              <DetailRow icon={Users} label="Guests" value={booking.guest_count ?? booking.expected_guests ?? booking.guests} />
               <DetailRow icon={Landmark} label="Hall" value={booking.hall_name ?? booking.hall?.name} />
               <DetailRow icon={FileText} label="Event Type" value={booking.event_type ?? booking.type} />
             </div>
@@ -248,21 +249,23 @@ export default function BookingDetail() {
 
           <Card title="Client Information">
             <div className="grid gap-4 md:grid-cols-2">
-              <DetailRow icon={Users} label="Name" value={booking.client?.full_name ?? booking.client_name} />
-              <DetailRow icon={FileText} label="Email" value={booking.client?.email} />
-              <DetailRow icon={FileText} label="Phone" value={booking.client?.phone} />
-              <DetailRow icon={FileText} label="Address" value={booking.client?.address} />
+              <DetailRow icon={Users} label="Name" value={client.full_name ?? booking.client_name} />
+              <DetailRow icon={FileText} label="Email" value={client.email ?? booking.client_email} />
+              <DetailRow icon={FileText} label="Phone" value={client.phone ?? booking.client_phone} />
+              <DetailRow icon={FileText} label="Address" value={client.address ?? booking.client_address} />
             </div>
             <div className="mt-5 flex items-center justify-between rounded-lg bg-slate-900 p-4 text-sm">
               <span className="text-slate-400">
-                Total bookings with this client: {booking.client?.bookings_count ?? 0}
+                Total bookings with this client: {client.total_bookings ?? client.bookings_count ?? booking.client_total_bookings ?? 0}
               </span>
-              <Link
-                to={`/clients/${booking.client_id ?? booking.client?.id}`}
-                className="font-medium text-(--primary) hover:brightness-125"
-              >
-                View Client History
-              </Link>
+              {booking.client_id ?? client.id ? (
+                <Link
+                  to={`/clients/${booking.client_id ?? client.id}`}
+                  className="font-medium text-(--primary) hover:brightness-125"
+                >
+                  View Client History
+                </Link>
+              ) : null}
             </div>
           </Card>
         </div>
