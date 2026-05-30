@@ -15,10 +15,14 @@ function payload(response) {
 function formatDate(date) {
   if (!date) return '-'
   return new Intl.DateTimeFormat('en-GB', {
-    weekday: 'short',
     day: 'numeric',
     month: 'short',
+    year: 'numeric',
   }).format(new Date(date))
+}
+
+function formatTime(time) {
+  return time ? String(time).slice(0, 5) : '-'
 }
 
 function shortId(value) {
@@ -27,64 +31,64 @@ function shortId(value) {
 
 const CARD_TEMPLATES = {
   'classic-luxe': {
-    header: '#111827',
+    gradient: 'linear-gradient(135deg, #111827 0%, #4b3416 48%, #f59e0b 100%)',
     accent: '#d4af37',
-    border: 'border-amber-300',
-    body: 'bg-white',
+    soft: '#fff7ed',
+    text: '#111827',
   },
   'modern-minimal': {
-    header: '#0f172a',
+    gradient: 'linear-gradient(135deg, #0f172a 0%, #075985 52%, #38bdf8 100%)',
     accent: '#38bdf8',
-    border: 'border-sky-300',
-    body: 'bg-slate-50',
+    soft: '#f0f9ff',
+    text: '#0f172a',
   },
   'royal-gold': {
-    header: '#3b0764',
+    gradient: 'linear-gradient(135deg, #3b0764 0%, #7e22ce 48%, #facc15 100%)',
     accent: '#facc15',
-    border: 'border-yellow-300',
-    body: 'bg-purple-50',
+    soft: '#faf5ff',
+    text: '#2e1065',
   },
   'floral-wedding': {
-    header: '#9f1239',
+    gradient: 'linear-gradient(135deg, #9f1239 0%, #f472b6 52%, #ffe4e6 100%)',
     accent: '#f9a8d4',
-    border: 'border-rose-200',
-    body: 'bg-rose-50',
+    soft: '#fff1f2',
+    text: '#881337',
   },
   'graduation-bold': {
-    header: '#111827',
+    gradient: 'linear-gradient(135deg, #111827 0%, #374151 48%, #f59e0b 100%)',
     accent: '#f59e0b',
-    border: 'border-slate-300',
-    body: 'bg-stone-50',
+    soft: '#fffbeb',
+    text: '#111827',
   },
   'corporate-clean': {
-    header: '#0f766e',
+    gradient: 'linear-gradient(135deg, #134e4a 0%, #0f766e 50%, #99f6e4 100%)',
     accent: '#99f6e4',
-    border: 'border-teal-200',
-    body: 'bg-white',
+    soft: '#f0fdfa',
+    text: '#134e4a',
   },
   'birthday-pop': {
-    header: '#be123c',
+    gradient: 'linear-gradient(135deg, #be123c 0%, #ec4899 45%, #22c55e 100%)',
     accent: '#22c55e',
-    border: 'border-green-200',
-    body: 'bg-pink-50',
+    soft: '#fdf2f8',
+    text: '#881337',
   },
   'black-tie': {
-    header: '#020617',
+    gradient: 'linear-gradient(135deg, #020617 0%, #18181b 52%, #71717a 100%)',
     accent: '#e5e7eb',
-    border: 'border-slate-400',
-    body: 'bg-zinc-50',
+    soft: '#fafafa',
+    text: '#020617',
   },
   'festival-bright': {
-    header: '#c2410c',
+    gradient: 'linear-gradient(135deg, #c2410c 0%, #f97316 45%, #fde047 100%)',
     accent: '#fde047',
-    border: 'border-orange-200',
-    body: 'bg-orange-50',
+    soft: '#fff7ed',
+    text: '#7c2d12',
   },
   'soft-elegance': {
-    header: '#475569',
+    gradient: 'linear-gradient(135deg, #475569 0%, #8b5cf6 52%, #c4b5fd 100%)',
     accent: '#c4b5fd',
-    border: 'border-violet-200',
-    body: 'bg-violet-50',
+    soft: '#f5f3ff',
+    text: '#312e81',
   },
 }
 
@@ -137,7 +141,12 @@ export default function GatePassCard({ pass, attendee, event, compact = false, s
     [attendee, data, event, tenant],
   )
   const template = CARD_TEMPLATES[passData.passTemplate] ?? CARD_TEMPLATES['classic-luxe']
-  const details = Object.entries(passData.passDetails || {}).filter(([, value]) => value)
+  const details = Object.entries(passData.passDetails || {})
+    .filter(([, value]) => value)
+    .slice(0, 2)
+  const timeRange = `${formatTime(passData.startTime)}${
+    passData.endTime ? ` - ${formatTime(passData.endTime)}` : ''
+  }`
 
   function downloadPdf() {
     window.print()
@@ -157,82 +166,133 @@ export default function GatePassCard({ pass, attendee, event, compact = false, s
     >
       <style>
         {`
+          .gate-pass-shell {
+            width: 21.5rem;
+            height: 13.5rem;
+          }
           @media print {
+            ${isStandalone ? '@page { size: 85.6mm 54mm; margin: 0; }' : ''}
             body { background: white !important; }
             .print-hidden { display: none !important; }
-            .gate-pass-shell { box-shadow: none !important; margin: 0 auto !important; }
+            .gate-pass-shell {
+              width: 85.6mm !important;
+              height: 54mm !important;
+              box-shadow: none !important;
+              margin: 0 auto !important;
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
           }
         `}
       </style>
 
       <div className={isStandalone ? 'mx-auto max-w-xl' : ''}>
-        <article className={`gate-pass-shell mx-auto overflow-hidden rounded-2xl border-4 ${template.border} ${template.body} text-slate-950 shadow-2xl print:shadow-none`}>
-          <header
-            className="px-8 py-6 text-center text-white"
-            style={{ backgroundColor: template.header || passData.primaryColor }}
-          >
-            <div className="mb-5 flex items-center justify-center gap-3">
-              {passData.tenantLogo ? (
-                <img
-                  src={passData.tenantLogo}
-                  alt={passData.tenantName}
-                  className="max-h-10 rounded bg-white/10 object-contain"
-                />
-              ) : null}
-              <span className="text-sm font-black tracking-[0.35em]">EVENTSHUB</span>
-            </div>
-            <p className="text-sm font-bold tracking-[0.35em]">GATE PASS</p>
-            <h1 className="mt-3 text-2xl font-black">{passData.eventName}</h1>
-          </header>
+        <article
+          className="gate-pass-shell relative mx-auto overflow-hidden rounded-[1.35rem] border border-white/70 text-slate-950 shadow-2xl ring-1 ring-black/10 print:shadow-none"
+          style={{ background: template.soft }}
+        >
+          <div
+            className="absolute inset-y-0 left-0 w-[38%]"
+            style={{ background: template.gradient || passData.primaryColor }}
+          />
+          <div className="absolute -left-8 -top-8 h-24 w-24 rounded-full border border-white/40 bg-white/15" />
+          <div className="absolute bottom-5 left-7 h-14 w-14 rounded-full border border-white/40 bg-white/10" />
+          <div className="absolute right-[-2.5rem] top-[-2.5rem] h-24 w-24 rounded-full bg-white/60" />
+          <div className="absolute bottom-[-2rem] right-20 h-16 w-16 rounded-full bg-white/40" />
 
-          <section className="relative px-8 py-8 text-center">
-            <div
-              className="mx-auto mb-4 inline-flex rounded-full px-5 py-2 text-sm font-black uppercase tracking-widest text-slate-950"
-              style={{ backgroundColor: template.accent }}
-            >
-              {passData.tag}
-            </div>
-            <h2 className="text-3xl font-black">{passData.attendeeName}</h2>
-            <p className="mt-2 text-lg font-semibold text-slate-600">Seat: {passData.seatNumber}</p>
-
-            <div className="mx-auto mt-8 grid max-w-sm grid-cols-[110px_1fr] overflow-hidden rounded-xl border border-slate-300 text-left text-sm">
-              <div className="border-b border-r border-slate-300 bg-slate-100 p-3 font-semibold">📅 Date</div>
-              <div className="border-b border-slate-300 p-3">{formatDate(passData.eventDate)}</div>
-              <div className="border-b border-r border-slate-300 bg-slate-100 p-3 font-semibold">🕐 Time</div>
-              <div className="border-b border-slate-300 p-3">
-                {passData.startTime ?? '-'} {passData.endTime ? `→ ${passData.endTime}` : ''}
+          <div className="relative grid h-full grid-cols-[38%_1fr]">
+            <aside className="flex h-full flex-col justify-between p-4 text-white">
+              <div>
+                <div className="flex items-center gap-2">
+                  {passData.tenantLogo ? (
+                    <img
+                      src={passData.tenantLogo}
+                      alt={passData.tenantName}
+                      className="h-7 max-w-16 rounded bg-white/20 object-contain p-1"
+                    />
+                  ) : null}
+                  <span className="text-[0.55rem] font-black uppercase tracking-[0.22em]">
+                    {passData.tenantName}
+                  </span>
+                </div>
+                <p className="mt-5 text-[0.62rem] font-black uppercase tracking-[0.3em]">
+                  You're Invited
+                </p>
+                <p className="mt-2 max-w-[6.5rem] text-lg font-black leading-5">
+                  {passData.eventName}
+                </p>
               </div>
-              <div className="border-b border-r border-slate-300 bg-slate-100 p-3 font-semibold">🏛 Hall</div>
-              <div className="border-b border-slate-300 p-3">{passData.hallName ?? '-'}</div>
-              <div className="border-r border-slate-300 bg-slate-100 p-3 font-semibold">🎪 Type</div>
-              <div className="p-3">{passData.eventType ?? '-'}</div>
-            </div>
 
-            {details.length ? (
-              <div className="mx-auto mt-5 grid max-w-sm gap-2 text-left text-sm">
-                {details.map(([key, value]) => (
-                  <div key={key} className="rounded-lg border border-slate-200 bg-white/70 px-3 py-2">
-                    <span className="font-semibold text-slate-500">{formatDetailLabel(key)}: </span>
-                    <span className="font-semibold text-slate-900">{value}</span>
+              <div>
+                <p className="text-[0.55rem] uppercase tracking-[0.25em] opacity-80">Pass ID</p>
+                <p className="mt-1 rounded-full bg-white/20 px-2 py-1 text-[0.62rem] font-black tracking-widest">
+                  {shortId(passData.passId)}
+                </p>
+              </div>
+            </aside>
+
+            <section className="flex h-full flex-col p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[0.58rem] font-black uppercase tracking-[0.32em]" style={{ color: template.text }}>
+                    Invitation Card
+                  </p>
+                  <h2 className="mt-1 truncate text-xl font-black leading-6" style={{ color: template.text }}>
+                    {passData.attendeeName}
+                  </h2>
+                  <div
+                    className="mt-2 inline-flex rounded-full px-3 py-1 text-[0.58rem] font-black uppercase tracking-widest"
+                    style={{ backgroundColor: template.accent, color: template.text }}
+                  >
+                    {passData.tag}
                   </div>
-                ))}
+                </div>
+
+                <div className="rounded-xl bg-white p-1.5 shadow-lg">
+                  <QRCodeCanvas value={passData.qrToken || String(passData.passId ?? '')} size={62} />
+                </div>
               </div>
-            ) : null}
 
-            <div className="absolute right-8 top-1/2 rotate-[-12deg] rounded-lg border-4 border-red-500 px-4 py-2 text-xl font-black tracking-widest text-red-500 opacity-80">
-              ADMIT ONE
-            </div>
-          </section>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-[0.67rem]">
+                <div className="rounded-xl bg-white/75 p-2 shadow-sm">
+                  <p className="font-black uppercase tracking-wider text-slate-400">Date</p>
+                  <p className="mt-0.5 font-black text-slate-900">{formatDate(passData.eventDate)}</p>
+                </div>
+                <div className="rounded-xl bg-white/75 p-2 shadow-sm">
+                  <p className="font-black uppercase tracking-wider text-slate-400">Time</p>
+                  <p className="mt-0.5 font-black text-slate-900">{timeRange}</p>
+                </div>
+                <div className="rounded-xl bg-white/75 p-2 shadow-sm">
+                  <p className="font-black uppercase tracking-wider text-slate-400">Seat</p>
+                  <p className="mt-0.5 truncate font-black text-slate-900">{passData.seatNumber}</p>
+                </div>
+                <div className="rounded-xl bg-white/75 p-2 shadow-sm">
+                  <p className="font-black uppercase tracking-wider text-slate-400">Venue</p>
+                  <p className="mt-0.5 truncate font-black text-slate-900">{passData.hallName ?? '-'}</p>
+                </div>
+              </div>
 
-          <footer className="border-t border-slate-200 px-8 py-7 text-center">
-            <div className="mx-auto flex h-[150px] w-[150px] items-center justify-center bg-white">
-              <QRCodeCanvas value={passData.qrToken || String(passData.passId ?? '')} size={150} />
-            </div>
-            <p className="mt-4 text-sm font-semibold text-slate-700">Scan at entry gate</p>
-            <p className="mt-1 text-xs uppercase tracking-widest text-slate-500">
-              Pass ID: {shortId(passData.passId)}
-            </p>
-          </footer>
+              {details.length ? (
+                <div className="mt-2 flex gap-1.5 overflow-hidden text-[0.58rem]">
+                  {details.map(([key, value]) => (
+                    <div key={key} className="min-w-0 rounded-full bg-white/65 px-2 py-1 font-bold text-slate-700">
+                      <span className="text-slate-400">{formatDetailLabel(key)}: </span>
+                      <span>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              <div className="mt-auto flex items-center justify-between border-t border-white/70 pt-2">
+                <p className="text-[0.58rem] font-bold uppercase tracking-[0.18em] text-slate-500">
+                  Scan at entry
+                </p>
+                <p className="text-[0.58rem] font-black uppercase tracking-[0.18em]" style={{ color: template.text }}>
+                  Admit One
+                </p>
+              </div>
+            </section>
+          </div>
         </article>
 
         {showActions ? (

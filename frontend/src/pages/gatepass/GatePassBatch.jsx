@@ -18,7 +18,7 @@ function rows(response) {
 }
 
 function eventTitle(event) {
-  return event.event_name ?? event.name ?? 'Gate Passes'
+  return event.event_name ?? event.name ?? 'Invitation Cards'
 }
 
 export default function GatePassBatch() {
@@ -50,13 +50,28 @@ export default function GatePassBatch() {
     <main className="min-h-screen bg-slate-900 px-4 py-6 text-slate-100 sm:px-6">
       <style>
         {`
-          @page { size: auto; margin: 12mm; }
+          @page { size: A4; margin: 8mm; }
           @media print {
             body { background: white !important; }
+            main { background: white !important; padding: 0 !important; }
             .print-hidden { display: none !important; }
-            .pass-print-card { break-after: page; page-break-after: always; }
-            .pass-print-card:last-child { break-after: auto; page-break-after: auto; }
-            .gate-pass-shell { box-shadow: none !important; }
+            .passes-grid {
+              display: grid !important;
+              grid-template-columns: repeat(2, 85.6mm);
+              gap: 6mm;
+              justify-content: center;
+            }
+            .pass-print-card {
+              break-inside: avoid;
+              page-break-inside: avoid;
+            }
+            .gate-pass-shell {
+              width: 85.6mm !important;
+              height: 54mm !important;
+              box-shadow: none !important;
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
           }
         `}
       </style>
@@ -71,7 +86,7 @@ export default function GatePassBatch() {
             Back to event
           </Link>
           <h1 className="text-2xl font-semibold">{eventTitle(event)}</h1>
-          <p className="mt-1 text-sm text-slate-400">{attendees.length} gate passes</p>
+          <p className="mt-1 text-sm text-slate-400">{attendees.length} invitation cards</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -85,7 +100,7 @@ export default function GatePassBatch() {
       </div>
 
       {attendees.length ? (
-        <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-2 print:block">
+        <div className="passes-grid mx-auto grid max-w-6xl gap-8 lg:grid-cols-2 2xl:grid-cols-3">
           {attendees.map((attendee) => (
             <div key={attendee.id ?? attendee.qr_token} className="pass-print-card">
               <GatePassCard attendee={attendee} event={event} compact showActions={false} />
@@ -94,9 +109,9 @@ export default function GatePassBatch() {
         </div>
       ) : (
         <div className="mx-auto max-w-xl rounded-xl border border-slate-700 bg-slate-800 p-6 text-center">
-          <p className="font-semibold">No gate passes generated yet.</p>
+          <p className="font-semibold">No invitation cards generated yet.</p>
           <Link to={`/events/${id}/attendees`} className="mt-4 inline-flex text-(--primary) hover:brightness-125">
-            Generate gate passes
+            Generate invitation cards
           </Link>
         </div>
       )}
